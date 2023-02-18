@@ -1,4 +1,4 @@
-# 2023-ISP-iStudy
+# 2023-ISP-MusicTracker
 > [See Issues View](https://github.com/users/CSAllenISD/projects/1/views/40?filterQuery=isp%3AiStudy)
 
 **Shariq Hasan:** Software Engineer, Project Manager
