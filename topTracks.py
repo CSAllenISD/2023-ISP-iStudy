@@ -70,8 +70,7 @@ def saveCSV(rows):
         print("XML data written in topTracks.csv")
 
 def main():
-        #username = input('Last.fm user: ')
-        username = 'bichow123'
+        username = input('Last.fm user: ')
         dates = getDates()
 
         #array of weeklyTopTracks; all Top Tracks
@@ -83,12 +82,14 @@ def main():
 
                 #get first 10 tracks from XML
                 weeklyTopTracks = parseXML('weeklyTracks.xml')
+
+                #percent complete
+                percent = round(date * 100 / len(dates))
+                print(str(round(percent,2)) + "% done parsing XMLs")
+                
                 #add the weekly top tracks to total
                 if weeklyTopTracks:
                         totalTopTracks.append(weeklyTopTracks)
-
-    
-
     
         #save totalTopTracks to topTracks.csv
         saveCSV(totalTopTracks)

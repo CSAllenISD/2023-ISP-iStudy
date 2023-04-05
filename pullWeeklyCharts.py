@@ -31,7 +31,7 @@ def parseXML(xml):
 def saveCSV(charts):
         fields = ['from','to']
         with open('charts.csv', 'w') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames = fields)
+                writer = csv.DictWriter(csvfile, fieldnames=fields)
                 writer.writeheader()
                 writer.writerows(charts)
         print("XML data written in charts.csv")
