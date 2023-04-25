@@ -2,6 +2,8 @@ import requests
 import apiKey
 import xml.etree.ElementTree as ET
 import csv
+import json
+import os.path
 
 #getting apiKey from local file
 apiKey = apiKey.apiKey
@@ -36,10 +38,17 @@ def saveCSV(charts):
                 writer.writerows(charts)
         print("XML data written in charts.csv")
 
+def saveJSON():
+        with open('./topTracks.json', 'r') as file:
+                data = json.load(file)
+                print(data)
+        
+                
+
 def main():
         username = input('Last.fm user: ')
         getWeeklyCharts(username)
         charts = parseXML('weeklyCharts.xml')
         saveCSV(charts)
 
-main()
+saveJSON()

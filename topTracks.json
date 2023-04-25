@@ -1,0 +1,21 @@
+{
+    "songs" : [
+        {
+            "name" : "song name",
+            "artist" : "artist",
+            "mbid": 0,
+            "image": "link",
+            "url" : "link",
+            "data" : [
+                {
+                    "date" : 0,
+                    "rank" : 1
+                },
+                {
+                    "date" : 1,
+                    "rank" : 2
+                }
+            ]
+        }
+    ]
+}
