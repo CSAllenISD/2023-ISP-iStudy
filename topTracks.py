@@ -2,6 +2,8 @@ import requests
 import apiKey
 import xml.etree.ElementTree as ET
 import csv
+import json
+import os.path
 
 #getting apiKey from local file
 apiKey = apiKey.apiKey
@@ -69,6 +71,11 @@ def saveCSV(rows):
                 writer.writerows(rows)
         print("XML data written in topTracks.csv")
 
+def saveJSON():
+        with open('./topTracks.json', 'r') as file:
+                data = json.load(file)
+                print(data)
+                
 def main():
         username = input('Last.fm user: ')
         dates = getDates()
@@ -85,7 +92,9 @@ def main():
 
                 #percent complete
                 percent = round(date * 100 / len(dates))
-                print(str(round(percent,2)) + "% done parsing XMLs")
+                previousPercent = round((date-1) * 100 / len(dates))
+                if percent != previousPercent:
+                        print(str(round(percent,2)) + "% done parsing XMLs")
                 
                 #add the weekly top tracks to total
                 if weeklyTopTracks:
