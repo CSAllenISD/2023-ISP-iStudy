@@ -32,49 +32,48 @@ def parseXML(xml):
         #parse weeklyTracks.xml into charts tree 
         tree = ET.parse(xml)
         root = tree.getroot()
-        weeklyTracks = []
 
-        #weeklyTracks = [from, to, song 1, song 2, ...]
-        weeklyTracks.append(root.find('weeklytrackchart').get('from'))
-        weeklyTracks.append(root.find('weeklytrackchart').get('to'))
-
-        #each song is a dictionary w/rank, title, artist, & url
-        songEntry = 0
-        for track in root.findall('./weeklytrackchart/'):
-                #only do first 10 instances
-                songEntry +=1
-                
-                song = {}
-                song[track.get('rank')] = track.get('rank')
-                song['name'] = track.find('name').text
-                song['artist'] = track.find('artist').text
-                song['url'] = track.find('url').text
-                weeklyTracks.append(song)
-
-                if songEntry == 10:
-                        break
-
-        #ONLY RETURN IF NOT EMPTY!
-        if len(weeklyTracks) > 2:
-                return weeklyTracks
-
-
-def saveCSV(rows):
-        fields = ['from','to']
-        for x in range(10):
-                fields.append("song "+str(x))
-        fieldWrapper = [fields]
-
-        with open('topTracks.csv', 'w') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerows(fieldWrapper)
-                writer.writerows(rows)
-        print("XML data written in topTracks.csv")
-
-def saveJSON():
+        #open JSON, create if new, write if old 
         with open('./topTracks.json', 'r') as file:
                 data = json.load(file)
                 print(data)
+        
+        #at end songs will become a JSON object then written to topTracks.json
+        songs = []
+
+        #for each song, make or find a dict
+        songEntry = 0
+        for track in root.findall('./weeklytrackchart/'):
+                songEntry +=1
+                #check if song is in songs
+                for song in songs:
+                        if song["name"] == track.find('name').text:
+                                #only add date object to data property of song dict
+                                addData = {
+                                        #always use "TO" for dates not FROM
+                                        "date" : root.find('weeklytrackchart').get('to'),
+                                        "rank" : track.find('weeklytrackchart').get('rank')
+                                }
+                                song["data"].append(addData)
+                        else:
+                                newSong = {
+                                        "name" : song["name"],
+                                        "artist" : song["artist"],
+                                        #"mbid" : ,
+                                        #"image : ,"
+                                        "url" : song['url'],
+                                        "data" : [{
+                                                "date" : root.find('weeklytrackchart').get('to'),
+                                                "rank" : track.find('weeklytrackchart').get('rank')
+                                        }]
+                                }
+
+                if songEntry == 10:
+                       break
+        #overwrite songs[] to topTracks.json
+        if len(songs) > 0:
+                with open('./topTracks.json', 'w') as file:
+                        data = json.dumps(songs, file)
                 
 def main():
         username = input('Last.fm user: ')
@@ -86,6 +85,10 @@ def main():
         for date in range(len(dates)):
                 #get the .getWeeklyAlbumChart XML
                 getWeeklyTracks(username, dates[date])
+
+                #reset JSON
+                if os.path.exists('./topTracks.json'):
+                        os.remove('./topTracks.json')
 
                 #get first 10 tracks from XML
                 weeklyTopTracks = parseXML('weeklyTracks.xml')
@@ -99,8 +102,5 @@ def main():
                 #add the weekly top tracks to total
                 if weeklyTopTracks:
                         totalTopTracks.append(weeklyTopTracks)
-    
-        #save totalTopTracks to topTracks.csv
-        saveCSV(totalTopTracks)
 
 main()
