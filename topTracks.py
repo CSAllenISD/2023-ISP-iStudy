@@ -20,6 +20,7 @@ def getDates():
                 rows.append(row)
         file.close()
         return rows
+        
 
 
 def getWeeklyTracks(user, date):        
@@ -33,48 +34,52 @@ def parseXML(xml):
         tree = ET.parse(xml)
         root = tree.getroot()
 
-        #open JSON, create if new, write if old 
-        with open('./topTracks.json', 'r') as file:
-                data = json.load(file)
-                print(data)
-        
-        #at end songs will become a JSON object then written to topTracks.json
-        songs = []
+        #open JSON, create if new, write if old
+        if os.path.isfile('./topTracks.json') == True:
+                with open('./topTracks.json', 'r') as file:
+                        data = json.load(file)
+        else:
+                data = []
+        #data has all current song data, either none or from preexisting JSON
+
 
         #for each song, make or find a dict
         songEntry = 0
         for track in root.findall('./weeklytrackchart/'):
                 songEntry +=1
-                #check if song is in songs
-                for song in songs:
-                        if song["name"] == track.find('name').text:
+                needNewSong = bool(True)
+                for song in data:
+                        #check if song already exists in data[]
+                        if song['name'] == str(track.find('name').text):
                                 #only add date object to data property of song dict
                                 addData = {
                                         #always use "TO" for dates not FROM
-                                        "date" : root.find('weeklytrackchart').get('to'),
-                                        "rank" : track.find('weeklytrackchart').get('rank')
+                                        "date" : int(root.find('weeklytrackchart').get('to')),
+                                        "rank" : int(track.get('rank'))
                                 }
-                                song["data"].append(addData)
-                        else:
-                                newSong = {
-                                        "name" : song["name"],
-                                        "artist" : song["artist"],
-                                        #"mbid" : ,
-                                        #"image : ,"
-                                        "url" : song['url'],
-                                        "data" : [{
-                                                "date" : root.find('weeklytrackchart').get('to'),
-                                                "rank" : track.find('weeklytrackchart').get('rank')
-                                        }]
-                                }
+                                song['data'].append(addData)
+                                needNewSong = bool(False)
 
+                if needNewSong == bool(True):
+                        newSong = {
+                                #mbid & image needed
+                                "name" : str(track.find('name').text),
+                                "artist" : str(track.find('artist').text),
+                                "url" : str(track.find('url').text),
+                                "data" : [{
+                                        "date" : int(root.find('weeklytrackchart').get('to')),
+                                        "rank" : int(track.get('rank'))
+                                }]
+                        }
+                        data.append(newSong)
+                                
                 if songEntry == 10:
                        break
-        #overwrite songs[] to topTracks.json
-        if len(songs) > 0:
-                with open('./topTracks.json', 'w') as file:
-                        data = json.dumps(songs, file)
-                
+        #overwrite data[] to topTracks.json
+        if len(data) > 0:
+                with open('./topTracks.json', 'w', encoding='utf-8') as file:
+                        json.dump(data, file, indent=4)
+
 def main():
         username = input('Last.fm user: ')
         dates = getDates()
@@ -82,14 +87,14 @@ def main():
         #array of weeklyTopTracks; all Top Tracks
         totalTopTracks = []
         
+        #reset JSON
+        if os.path.exists('./topTracks.json'):
+                os.remove('./topTracks.json')
+
         for date in range(len(dates)):
                 #get the .getWeeklyAlbumChart XML
                 getWeeklyTracks(username, dates[date])
-
-                #reset JSON
-                if os.path.exists('./topTracks.json'):
-                        os.remove('./topTracks.json')
-
+        
                 #get first 10 tracks from XML
                 weeklyTopTracks = parseXML('weeklyTracks.xml')
 

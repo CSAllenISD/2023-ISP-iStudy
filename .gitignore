@@ -3,4 +3,5 @@ apiKey.py
 __pycache__
 *.xml
 *.csv
+*.json
 plot.py
